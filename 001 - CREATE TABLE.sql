@@ -1,4 +1,4 @@
---CREATE TABLE
+--CREATE TABLEEEEE
 create table sljbardc (codigos numeric(6,0) default 0 not null,emps char(3) collate SQL_Latin1_General_CP1_CI_AS default ' ' not null,datas datetime null,status numeric(1,0) default 0 not null)
 
 go
