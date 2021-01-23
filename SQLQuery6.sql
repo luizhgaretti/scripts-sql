@@ -1,0 +1,38 @@
+use LOPRODUC
+-- Declarando a variavel
+DECLARE @TBFLYTEL DATETIME
+-- Declarando o Cursor
+DECLARE C_DEL_FLY_TEL CURSOR LOCAL FOR
+ -- Faz o Select
+   SELECT DATA
+   FROM TBFLYTEL
+   WHERE   DATEDIFF(DAY,DATA,GETDATE()) > = 90
+   GROUP BY DATA
+ -- Abre o cursor 
+OPEN C_DEL_FLY_TEL
+-- Le a proxima linha
+FETCH NEXT FROM C_DEL_FLY_TEL INTO @TBFLYTEL
+-- Enquanto tiver a proxima linha continua....
+WHILE @@FETCH_STATUS = 0
+
+BEGIN
+-- Deleta os registros.
+    DELETE
+    FROM TBFLYTEL
+    WHERE CONVERT(CHAR(8),DATA,112)  = CONVERT(CHAR(8),@TBFLYTEL,112)
+
+
+    -- Lendo a próxima linha
+FETCH NEXT FROM C_DEL_FLY_TEL INTO @TBFLYTEL
+END
+
+-- Fechando Cursor para leitura
+CLOSE C_DEL_FLY_TEL
+
+-- Desalocando o cursor
+DEALLOCATE C_DEL_FLY_TEL
+
+USE LOPRODUC
+SELECT COUNT(1)
+FROM TBFLYTEL
+WHERE DATEDIFF(DAY,DATA,GETDATE()) >= 90

@@ -1,0 +1,46 @@
+/* Listar */
+
+	SELECT	ag.name, agl.dns_name, agl.ip_configuration_string_from_cluster
+	FROM	sys.availability_group_listeners agl
+	INNER JOIN sys.availability_groups ag on ag.group_id = agl.group_id
+
+	SELECT replica_server_name, read_only_routing_url, secondary_role_allow_connections_desc
+	FROM sys.availability_replicas
+
+	SELECT
+		agr1.replica_server_name	SourceReplica,		--the source replica
+		agr2.replica_server_name	ReadOnlyReplica,	--the read only replica for the source replica
+		agr1.read_only_routing_url	Rota,				--the configured read-only routing URL for the source replica
+		agr.routing_priority		Prioridade			--the routing priority for that read-only replica
+	FROM sys.availability_read_only_routing_lists agr
+	INNER JOIN sys.availability_replicas agr1 ON agr.replica_id = agr1.replica_id
+	INNER JOIN sys.availability_replicas agr2 ON agr.read_only_replica_id = agr2.replica_id
+	INNER JOIN sys.availability_groups ag ON ag.group_id = agr1.group_id
+	ORDER BY agr1.replica_server_name, agr.routing_priority
+
+
+/* Adicionar */
+
+	ALTER AVAILABILITY GROUP HADBSERVICE01 MODIFY REPLICA ON 'SERV-DBPRODCL04' WITH (SECONDARY_ROLE(ALLOW_CONNECTIONS = READ_ONLY))
+	GO
+	ALTER AVAILABILITY GROUP HADBSERVICE01 MODIFY REPLICA ON 'SERV-DBPRODCL03' WITH (SECONDARY_ROLE(ALLOW_CONNECTIONS = READ_ONLY))
+	GO
+
+	ALTER AVAILABILITY GROUP HADBSERVICE01 MODIFY REPLICA ON 'SERV-DBPRODCL04' WITH (SECONDARY_ROLE (READ_ONLY_ROUTING_URL = N'TCP://SERV-DBPRODCL04.central.iamspe.com.br:1433'));
+	GO
+	ALTER AVAILABILITY GROUP HADBSERVICE01 MODIFY REPLICA ON 'SERV-DBPRODCL03' WITH (SECONDARY_ROLE (READ_ONLY_ROUTING_URL = N'TCP://SERV-DBPRODCL03.central.iamspe.com.br:1433'));
+	GO
+
+	ALTER AVAILABILITY GROUP HADBSERVICE01 MODIFY REPLICA ON 'SERV-DBPRODCL04' WITH (PRIMARY_ROLE (READ_ONLY_ROUTING_LIST=('SERV-DBPRODCL03', 'SERV-DBPRODCL04')));
+	GO
+	ALTER AVAILABILITY GROUP HADBSERVICE01 MODIFY REPLICA ON 'SERV-DBPRODCL03' WITH (PRIMARY_ROLE (READ_ONLY_ROUTING_LIST=('SERV-DBPRODCL04', 'SERV-DBPRODCL03')));
+	GO
+
+/* Remover */
+
+	ALTER AVAILABILITY GROUP HADBSERVICE01 MODIFY REPLICA ON N'SERV-DBPRODCL04' WITH (SECONDARY_ROLE (ALLOW_CONNECTIONS = ALL)); 
+	ALTER AVAILABILITY GROUP HADBSERVICE01 MODIFY REPLICA ON N'SERV-DBPRODCL03' WITH (SECONDARY_ROLE (ALLOW_CONNECTIONS = ALL));
+
+	ALTER AVAILABILITY GROUP HADBSERVICE01 MODIFY REPLICA ON N'SERV-DBPRODCL03' WITH (PRIMARY_ROLE (READ_ONLY_ROUTING_LIST=NONE));
+	ALTER AVAILABILITY GROUP HADBSERVICE01 MODIFY REPLICA ON N'SERV-DBPRODCL04' WITH (PRIMARY_ROLE (READ_ONLY_ROUTING_LIST=NONE));
+	GO

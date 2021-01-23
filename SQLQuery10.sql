@@ -1,0 +1,4 @@
+SELECT Tipo,	[CNPJ / CPF],	[Inscricao Est / RG],	[Razão Social],	Identificação,	Endereço,	Numero,	Complemento,	Cidade,	Estado,	Cep,	DDD,	Telefone,	Fax, 	email,	grupo,	bairro,	obs,	[cod capta iclis],	Pais_2,	[Data de Nascimento],	Segmento,	Vendedor,	[Data de Cadastro],	[Data Ult Alt Cadastro],	Classificação,	[Data Última Compra],	[Tabela de Desconto],	[Inscricao Suframa] ,	[telefone 2],	Municipio,	Pais,	Situcao,	Inativo,	Validade,	Cargo,	Empresa,	ceptrabs ,	Conjuges ,	dtcasas ,	endtrabs,	estcivils ,	sexos,	cpfcs,	rgcs,	emptrabs,	teltrabs,	bairtrabs,	cidatrabs ,	estatrabs,	profiss,	procons,	salarios,	dtadmis,	ccargos,	ctpdocs,	cndocs,	numtrabs,	compltrabs,	cnpjtrabs,	rendafams,	cempcons,	ctelcons,	ccarcons,	pais_,	maes,	nacionals,	sexcons,	class,	subclass,	codagrups,	mailnfes,	iclirdzs,	ccartoes,	dtncons,	Numero_,	ctelems,	fidelidade,	DtEmisDoc,	OrgaoEmis
+FROM SLJCLI_RR
+
+

@@ -1,0 +1,4 @@
+SELECT SUM(TOTAL_PAGES - used_pages)* 8192 / 1024 FROM sys.allocation_units --8192 em bytes (cada pagina tem 8 kb)
+GO
+
+--SP_SPACEUSED

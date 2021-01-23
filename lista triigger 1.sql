@@ -1,0 +1,13 @@
+1)	CRIE UM TRIGGER CHAMADO TRG_IMPEDE_CLIENTE NA TABELA DE CLIENTE PARA QUE IMPEÇA A INSERÇÃO DE NOVOS CLIENTES AOS  DOMINGOS.  DICA (CONVERTA A DATA DO SISTEMA PARA CHAR E DESCUBRA O DIA DA SEMANA)
+
+create or replace trigger TRG_IMPEDE_CLIENTE before insert on cliente
+	
+begin
+	if TO_CHAR(SYSDATE,'D') = 1 then
+		raise_application_error(-20001,'Nao e permitido inserir dados aos domingos');
+		return;
+	end if;
+end;
+/
+
+INSERT INTO CLIENTE (COD_CLIENTE,NOM_CLIENTE) VALUES (456,'JOHAB TESTE');

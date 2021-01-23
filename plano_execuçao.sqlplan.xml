@@ -1,0 +1,728 @@
+<?xml version="1.0" encoding="utf-16"?>
+<ShowPlanXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.1" Build="10.50.2500.0" xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementCompId="1" StatementEstRows="1" StatementId="1" StatementOptmLevel="FULL" StatementOptmEarlyAbortReason="TimeOut" StatementSubTreeCost="0.418187" StatementText="SELECT TOP 1 cad.recnum,&#xD;&#xA;             cad.c_emp,&#xD;&#xA;             cad.c_dos,&#xD;&#xA;             CASE&#xD;&#xA;               WHEN Count(DISTINCT h.data) &gt; 0&#xD;&#xA;                    AND Count(DISTINCT h.data) &lt; 3 THEN 'N'&#xD;&#xA;               WHEN Count(DISTINCT h.data) &gt; = 3&#xD;&#xA;                    AND ina.cd_acionamento &lt;&gt; Isnull(0, NULL) THEN 'N'&#xD;&#xA;               WHEN Count(DISTINCT h.data) &gt;= 3&#xD;&#xA;                    AND Isnull(ina.cd_acionamento, 0) = 0 THEN 'S'&#xD;&#xA;             END AS inadimplencia,&#xD;&#xA;             ina.cd_acionamento&#xD;&#xA;FROM   cadcontr cad (nolock)&#xD;&#xA;       LEFT JOIN histcobr h (nolock)&#xD;&#xA;              ON h.empresa = cad.c_emp&#xD;&#xA;                 AND h.n_numero = cad.c_dos&#xD;&#xA;                 AND h.data &gt;= cad.c_dat&#xD;&#xA;                 AND h.local IN ( 'LR', 'LT' )&#xD;&#xA;       LEFT JOIN tbinadim ina (nolock)&#xD;&#xA;              ON ina.cd_empresa = cad.c_emp&#xD;&#xA;                 AND ina.nr_nosso_numero = cad.c_dos&#xD;&#xA;                 AND ina.nr_parcela = cad.c_par&#xD;&#xA;WHERE  c_fil = '36'&#xD;&#xA;       AND c_cob = '183'&#xD;&#xA;       AND c_emp = '200'&#xD;&#xA;       AND cad.c_dat BETWEEN '2012-05-08 00:00:00.000' AND&#xD;&#xA;                             ' 2012-08-31 00:00:00.000'&#xD;&#xA;       AND c_sit = '1'&#xD;&#xA;       AND cad.dt_acionamento &lt;&gt; '2012-08-07'&#xD;&#xA;GROUP  BY cad.recnum,&#xD;&#xA;          cad.c_emp,&#xD;&#xA;          cad.c_dos,&#xD;&#xA;          ina.cd_acionamento,&#xD;&#xA;          c_venc&#xD;&#xA;ORDER  BY c_emp,&#xD;&#xA;          c_dos " StatementType="SELECT" QueryHash="0xC1FDF2267D4BBA8D" QueryPlanHash="0x0547CFE4FB2BD865">
+          <StatementSetOptions ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" ARITHABORT="true" CONCAT_NULL_YIELDS_NULL="true" NUMERIC_ROUNDABORT="false" QUOTED_IDENTIFIER="true" />
+          <QueryPlan CachedPlanSize="104" CompileTime="29" CompileCPU="29" CompileMemory="1400">
+            <RelOp AvgRowSize="23" EstimateCPU="1E-07" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimateRows="1" LogicalOp="Compute Scalar" NodeId="0" Parallel="false" PhysicalOp="Compute Scalar" EstimatedTotalSubtreeCost="0.418187">
+              <OutputList>
+                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                <ColumnReference Column="Expr1007" />
+              </OutputList>
+              <ComputeScalar>
+                <DefinedValues>
+                  <DefinedValue>
+                    <ColumnReference Column="Expr1007" />
+                    <ScalarOperator ScalarString="CASE WHEN [Expr1006]&gt;(0) AND [Expr1006]&lt;(3) THEN 'N' ELSE CASE WHEN [Expr1006]&gt;=(3) AND [LOFINASA].[dbo].[TBINADIM].[CD_ACIONAMENTO] as [ina].[CD_ACIONAMENTO]&lt;&gt;(0) THEN 'N' ELSE CASE WHEN [Expr1006]&gt;=(3) AND isnull([LOFINASA].[dbo].[TBINADIM].[CD_ACIONAMENTO] as [ina].[CD_ACIONAMENTO],(0))=(0) THEN 'S' ELSE NULL END END END">
+                      <IF>
+                        <Condition>
+                          <ScalarOperator>
+                            <Logical Operation="AND">
+                              <ScalarOperator>
+                                <Compare CompareOp="GT">
+                                  <ScalarOperator>
+                                    <Identifier>
+                                      <ColumnReference Column="Expr1006" />
+                                    </Identifier>
+                                  </ScalarOperator>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(0)" />
+                                  </ScalarOperator>
+                                </Compare>
+                              </ScalarOperator>
+                              <ScalarOperator>
+                                <Compare CompareOp="LT">
+                                  <ScalarOperator>
+                                    <Identifier>
+                                      <ColumnReference Column="Expr1006" />
+                                    </Identifier>
+                                  </ScalarOperator>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(3)" />
+                                  </ScalarOperator>
+                                </Compare>
+                              </ScalarOperator>
+                            </Logical>
+                          </ScalarOperator>
+                        </Condition>
+                        <Then>
+                          <ScalarOperator>
+                            <Const ConstValue="'N'" />
+                          </ScalarOperator>
+                        </Then>
+                        <Else>
+                          <ScalarOperator>
+                            <IF>
+                              <Condition>
+                                <ScalarOperator>
+                                  <Logical Operation="AND">
+                                    <ScalarOperator>
+                                      <Compare CompareOp="GE">
+                                        <ScalarOperator>
+                                          <Identifier>
+                                            <ColumnReference Column="Expr1006" />
+                                          </Identifier>
+                                        </ScalarOperator>
+                                        <ScalarOperator>
+                                          <Const ConstValue="(3)" />
+                                        </ScalarOperator>
+                                      </Compare>
+                                    </ScalarOperator>
+                                    <ScalarOperator>
+                                      <Compare CompareOp="NE">
+                                        <ScalarOperator>
+                                          <Identifier>
+                                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                                          </Identifier>
+                                        </ScalarOperator>
+                                        <ScalarOperator>
+                                          <Const ConstValue="(0)" />
+                                        </ScalarOperator>
+                                      </Compare>
+                                    </ScalarOperator>
+                                  </Logical>
+                                </ScalarOperator>
+                              </Condition>
+                              <Then>
+                                <ScalarOperator>
+                                  <Const ConstValue="'N'" />
+                                </ScalarOperator>
+                              </Then>
+                              <Else>
+                                <ScalarOperator>
+                                  <IF>
+                                    <Condition>
+                                      <ScalarOperator>
+                                        <Logical Operation="AND">
+                                          <ScalarOperator>
+                                            <Compare CompareOp="GE">
+                                              <ScalarOperator>
+                                                <Identifier>
+                                                  <ColumnReference Column="Expr1006" />
+                                                </Identifier>
+                                              </ScalarOperator>
+                                              <ScalarOperator>
+                                                <Const ConstValue="(3)" />
+                                              </ScalarOperator>
+                                            </Compare>
+                                          </ScalarOperator>
+                                          <ScalarOperator>
+                                            <Compare CompareOp="EQ">
+                                              <ScalarOperator>
+                                                <Intrinsic FunctionName="isnull">
+                                                  <ScalarOperator>
+                                                    <Identifier>
+                                                      <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                                                    </Identifier>
+                                                  </ScalarOperator>
+                                                  <ScalarOperator>
+                                                    <Const ConstValue="(0)" />
+                                                  </ScalarOperator>
+                                                </Intrinsic>
+                                              </ScalarOperator>
+                                              <ScalarOperator>
+                                                <Const ConstValue="(0)" />
+                                              </ScalarOperator>
+                                            </Compare>
+                                          </ScalarOperator>
+                                        </Logical>
+                                      </ScalarOperator>
+                                    </Condition>
+                                    <Then>
+                                      <ScalarOperator>
+                                        <Const ConstValue="'S'" />
+                                      </ScalarOperator>
+                                    </Then>
+                                    <Else>
+                                      <ScalarOperator>
+                                        <Const ConstValue="NULL" />
+                                      </ScalarOperator>
+                                    </Else>
+                                  </IF>
+                                </ScalarOperator>
+                              </Else>
+                            </IF>
+                          </ScalarOperator>
+                        </Else>
+                      </IF>
+                    </ScalarOperator>
+                  </DefinedValue>
+                </DefinedValues>
+                <RelOp AvgRowSize="23" EstimateCPU="0.000114959" EstimateIO="0.0112613" EstimateRebinds="0" EstimateRewinds="0" EstimateRows="1" LogicalOp="TopN Sort" NodeId="1" Parallel="false" PhysicalOp="Sort" EstimatedTotalSubtreeCost="0.418187">
+                  <OutputList>
+                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                    <ColumnReference Column="Expr1006" />
+                  </OutputList>
+                  <MemoryFractions Input="0.2" Output="1" />
+                  <TopSort Distinct="false" Rows="1">
+                    <OrderBy>
+                      <OrderByColumn Ascending="true">
+                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                      </OrderByColumn>
+                    </OrderBy>
+                    <RelOp AvgRowSize="23" EstimateCPU="1.77974E-05" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimateRows="4.44711" LogicalOp="Compute Scalar" NodeId="2" Parallel="false" PhysicalOp="Compute Scalar" EstimatedTotalSubtreeCost="0.406811">
+                      <OutputList>
+                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                        <ColumnReference Column="Expr1006" />
+                      </OutputList>
+                      <ComputeScalar>
+                        <DefinedValues>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1006" />
+                            <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1012],0)">
+                              <Convert DataType="int" Style="0" Implicit="true">
+                                <ScalarOperator>
+                                  <Identifier>
+                                    <ColumnReference Column="Expr1012" />
+                                  </Identifier>
+                                </ScalarOperator>
+                              </Convert>
+                            </ScalarOperator>
+                          </DefinedValue>
+                        </DefinedValues>
+                        <RelOp AvgRowSize="23" EstimateCPU="1.77974E-05" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimateRows="4.44711" LogicalOp="Aggregate" NodeId="3" Parallel="false" PhysicalOp="Stream Aggregate" EstimatedTotalSubtreeCost="0.406811">
+                          <OutputList>
+                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                            <ColumnReference Column="Expr1012" />
+                          </OutputList>
+                          <StreamAggregate>
+                            <DefinedValues>
+                              <DefinedValue>
+                                <ColumnReference Column="Expr1012" />
+                                <ScalarOperator ScalarString="COUNT([LOFINASA].[dbo].[HISTCOBR].[DATA] as [h].[DATA])">
+                                  <Aggregate AggType="COUNT_BIG" Distinct="false">
+                                    <ScalarOperator>
+                                      <Identifier>
+                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="DATA" />
+                                      </Identifier>
+                                    </ScalarOperator>
+                                  </Aggregate>
+                                </ScalarOperator>
+                              </DefinedValue>
+                              <DefinedValue>
+                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                <ScalarOperator ScalarString="ANY([LOFINASA].[dbo].[CADCONTR].[C_EMP] as [cad].[C_EMP])">
+                                  <Aggregate AggType="ANY" Distinct="false">
+                                    <ScalarOperator>
+                                      <Identifier>
+                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                      </Identifier>
+                                    </ScalarOperator>
+                                  </Aggregate>
+                                </ScalarOperator>
+                              </DefinedValue>
+                              <DefinedValue>
+                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                <ScalarOperator ScalarString="ANY([LOFINASA].[dbo].[CADCONTR].[C_DOS] as [cad].[C_DOS])">
+                                  <Aggregate AggType="ANY" Distinct="false">
+                                    <ScalarOperator>
+                                      <Identifier>
+                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                      </Identifier>
+                                    </ScalarOperator>
+                                  </Aggregate>
+                                </ScalarOperator>
+                              </DefinedValue>
+                            </DefinedValues>
+                            <GroupBy>
+                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                            </GroupBy>
+                            <RelOp AvgRowSize="27" EstimateCPU="0.000290596" EstimateIO="0.0112613" EstimateRebinds="0" EstimateRewinds="0" EstimateRows="25.9563" LogicalOp="Distinct Sort" NodeId="4" Parallel="false" PhysicalOp="Sort" EstimatedTotalSubtreeCost="0.406793">
+                              <OutputList>
+                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="DATA" />
+                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                              </OutputList>
+                              <MemoryFractions Input="0.333333" Output="0.8" />
+                              <Sort Distinct="true">
+                                <OrderBy>
+                                  <OrderByColumn Ascending="true">
+                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                                  </OrderByColumn>
+                                  <OrderByColumn Ascending="true">
+                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                  </OrderByColumn>
+                                  <OrderByColumn Ascending="true">
+                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="DATA" />
+                                  </OrderByColumn>
+                                </OrderBy>
+                                <RelOp AvgRowSize="27" EstimateCPU="0.000108645" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimateRows="25.9916" LogicalOp="Inner Join" NodeId="5" Parallel="false" PhysicalOp="Nested Loops" EstimatedTotalSubtreeCost="0.395241">
+                                  <OutputList>
+                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="DATA" />
+                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                                  </OutputList>
+                                  <NestedLoops Optimized="false">
+                                    <PassThru>
+                                      <ScalarOperator ScalarString="[IsBaseRow1005] IS NULL">
+                                        <Compare CompareOp="IS">
+                                          <ScalarOperator>
+                                            <Identifier>
+                                              <ColumnReference Column="IsBaseRow1005" />
+                                            </Identifier>
+                                          </ScalarOperator>
+                                          <ScalarOperator>
+                                            <Const ConstValue="NULL" />
+                                          </ScalarOperator>
+                                        </Compare>
+                                      </ScalarOperator>
+                                    </PassThru>
+                                    <OuterReferences>
+                                      <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="RECNUM" />
+                                    </OuterReferences>
+                                    <RelOp AvgRowSize="30" EstimateCPU="0.000108645" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimateRows="25.9916" LogicalOp="Left Outer Join" NodeId="6" Parallel="false" PhysicalOp="Nested Loops" EstimatedTotalSubtreeCost="0.384312">
+                                      <OutputList>
+                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="DATA" />
+                                        <ColumnReference Column="IsBaseRow1005" />
+                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="RECNUM" />
+                                      </OutputList>
+                                      <NestedLoops Optimized="false" WithUnorderedPrefetch="true">
+                                        <OuterReferences>
+                                          <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                          <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_PAR" />
+                                          <ColumnReference Column="Expr1011" />
+                                        </OuterReferences>
+                                        <RelOp AvgRowSize="27" EstimateCPU="0.000102708" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimateRows="25.9916" LogicalOp="Left Outer Join" NodeId="8" Parallel="false" PhysicalOp="Nested Loops" EstimatedTotalSubtreeCost="0.365777">
+                                          <OutputList>
+                                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_PAR" />
+                                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="DATA" />
+                                          </OutputList>
+                                          <NestedLoops Optimized="false">
+                                            <OuterReferences>
+                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DAT" />
+                                            </OuterReferences>
+                                            <RelOp AvgRowSize="35" EstimateCPU="8.48097E-06" EstimateIO="0" EstimateRebinds="0" EstimateRewinds="0" EstimateRows="2.02894" LogicalOp="Inner Join" NodeId="9" Parallel="false" PhysicalOp="Nested Loops" EstimatedTotalSubtreeCost="0.00933468">
+                                              <OutputList>
+                                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DAT" />
+                                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_PAR" />
+                                              </OutputList>
+                                              <NestedLoops Optimized="true">
+                                                <OuterReferences>
+                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                                </OuterReferences>
+                                                <RelOp AvgRowSize="25" EstimateCPU="0.000290984" EstimateIO="0.00386574" EstimateRebinds="0" EstimateRewinds="0" EstimateRows="2.02894" LogicalOp="Index Seek" NodeId="11" Parallel="false" PhysicalOp="Index Seek" EstimatedTotalSubtreeCost="0.00415672" TableCardinality="1056270">
+                                                  <OutputList>
+                                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DAT" />
+                                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_PAR" />
+                                                  </OutputList>
+                                                  <IndexScan Ordered="true" ScanDirection="FORWARD" ForcedIndex="false" ForceSeek="false" NoExpandHint="false">
+                                                    <DefinedValues>
+                                                      <DefinedValue>
+                                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                                      </DefinedValue>
+                                                      <DefinedValue>
+                                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                                      </DefinedValue>
+                                                      <DefinedValue>
+                                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DAT" />
+                                                      </DefinedValue>
+                                                      <DefinedValue>
+                                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_PAR" />
+                                                      </DefinedValue>
+                                                    </DefinedValues>
+                                                    <Object Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Index="[CADCONTR017]" Alias="[cad]" IndexKind="NonClustered" />
+                                                    <SeekPredicates>
+                                                      <SeekPredicateNew>
+                                                        <SeekKeys>
+                                                          <Prefix ScanType="EQ">
+                                                            <RangeColumns>
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_FIL" />
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_COB" />
+                                                            </RangeColumns>
+                                                            <RangeExpressions>
+                                                              <ScalarOperator ScalarString="(36)">
+                                                                <Const ConstValue="(36)" />
+                                                              </ScalarOperator>
+                                                              <ScalarOperator ScalarString="(183)">
+                                                                <Const ConstValue="(183)" />
+                                                              </ScalarOperator>
+                                                            </RangeExpressions>
+                                                          </Prefix>
+                                                          <StartRange ScanType="GE">
+                                                            <RangeColumns>
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DAT" />
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_SIT" />
+                                                            </RangeColumns>
+                                                            <RangeExpressions>
+                                                              <ScalarOperator ScalarString="'2012-05-08 00:00:00.000'">
+                                                                <Const ConstValue="'2012-05-08 00:00:00.000'" />
+                                                              </ScalarOperator>
+                                                              <ScalarOperator ScalarString="(200)">
+                                                                <Const ConstValue="(200)" />
+                                                              </ScalarOperator>
+                                                              <ScalarOperator ScalarString="(1)">
+                                                                <Const ConstValue="(1)" />
+                                                              </ScalarOperator>
+                                                            </RangeExpressions>
+                                                          </StartRange>
+                                                          <EndRange ScanType="LE">
+                                                            <RangeColumns>
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DAT" />
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_SIT" />
+                                                            </RangeColumns>
+                                                            <RangeExpressions>
+                                                              <ScalarOperator ScalarString="'2012-08-31 00:00:00.000'">
+                                                                <Const ConstValue="'2012-08-31 00:00:00.000'" />
+                                                              </ScalarOperator>
+                                                              <ScalarOperator ScalarString="(200)">
+                                                                <Const ConstValue="(200)" />
+                                                              </ScalarOperator>
+                                                              <ScalarOperator ScalarString="(1)">
+                                                                <Const ConstValue="(1)" />
+                                                              </ScalarOperator>
+                                                            </RangeExpressions>
+                                                          </EndRange>
+                                                        </SeekKeys>
+                                                      </SeekPredicateNew>
+                                                    </SeekPredicates>
+                                                    <Predicate>
+                                                      <ScalarOperator ScalarString="[LOFINASA].[dbo].[CADCONTR].[C_EMP] as [cad].[C_EMP]=(200) AND [LOFINASA].[dbo].[CADCONTR].[C_SIT] as [cad].[C_SIT]=(1)">
+                                                        <Logical Operation="AND">
+                                                          <ScalarOperator>
+                                                            <Compare CompareOp="EQ">
+                                                              <ScalarOperator>
+                                                                <Identifier>
+                                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_EMP" />
+                                                                </Identifier>
+                                                              </ScalarOperator>
+                                                              <ScalarOperator>
+                                                                <Const ConstValue="(200)" />
+                                                              </ScalarOperator>
+                                                            </Compare>
+                                                          </ScalarOperator>
+                                                          <ScalarOperator>
+                                                            <Compare CompareOp="EQ">
+                                                              <ScalarOperator>
+                                                                <Identifier>
+                                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_SIT" />
+                                                                </Identifier>
+                                                              </ScalarOperator>
+                                                              <ScalarOperator>
+                                                                <Const ConstValue="(1)" />
+                                                              </ScalarOperator>
+                                                            </Compare>
+                                                          </ScalarOperator>
+                                                        </Logical>
+                                                      </ScalarOperator>
+                                                    </Predicate>
+                                                  </IndexScan>
+                                                </RelOp>
+                                                <RelOp AvgRowSize="19" EstimateCPU="0.0001581" EstimateIO="0.003125" EstimateRebinds="1.02894" EstimateRewinds="0" EstimateRows="2.02894" LogicalOp="Clustered Index Seek" NodeId="13" Parallel="false" PhysicalOp="Clustered Index Seek" EstimatedTotalSubtreeCost="0.00506229" TableCardinality="1056270">
+                                                  <OutputList>
+                                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                                  </OutputList>
+                                                  <IndexScan Lookup="true" Ordered="true" ScanDirection="FORWARD" ForcedIndex="false" ForceSeek="false" NoExpandHint="false">
+                                                    <DefinedValues>
+                                                      <DefinedValue>
+                                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                                      </DefinedValue>
+                                                    </DefinedValues>
+                                                    <Object Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Index="[pk_CADCONTR]" Alias="[cad]" TableReferenceId="-1" IndexKind="Clustered" />
+                                                    <SeekPredicates>
+                                                      <SeekPredicateNew>
+                                                        <SeekKeys>
+                                                          <Prefix ScanType="EQ">
+                                                            <RangeColumns>
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                                            </RangeColumns>
+                                                            <RangeExpressions>
+                                                              <ScalarOperator ScalarString="[LOFINASA].[dbo].[CADCONTR].[RECNUM] as [cad].[RECNUM]">
+                                                                <Identifier>
+                                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="RECNUM" />
+                                                                </Identifier>
+                                                              </ScalarOperator>
+                                                            </RangeExpressions>
+                                                          </Prefix>
+                                                        </SeekKeys>
+                                                      </SeekPredicateNew>
+                                                    </SeekPredicates>
+                                                    <Predicate>
+                                                      <ScalarOperator ScalarString="[LOFINASA].[dbo].[CADCONTR].[DT_ACIONAMENTO] as [cad].[DT_ACIONAMENTO]&lt;'2012-08-07 00:00:00.000' OR [LOFINASA].[dbo].[CADCONTR].[DT_ACIONAMENTO] as [cad].[DT_ACIONAMENTO]&gt;'2012-08-07 00:00:00.000'">
+                                                        <Logical Operation="OR">
+                                                          <ScalarOperator>
+                                                            <Compare CompareOp="LT">
+                                                              <ScalarOperator>
+                                                                <Identifier>
+                                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="DT_ACIONAMENTO" />
+                                                                </Identifier>
+                                                              </ScalarOperator>
+                                                              <ScalarOperator>
+                                                                <Const ConstValue="'2012-08-07 00:00:00.000'" />
+                                                              </ScalarOperator>
+                                                            </Compare>
+                                                          </ScalarOperator>
+                                                          <ScalarOperator>
+                                                            <Compare CompareOp="GT">
+                                                              <ScalarOperator>
+                                                                <Identifier>
+                                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="DT_ACIONAMENTO" />
+                                                                </Identifier>
+                                                              </ScalarOperator>
+                                                              <ScalarOperator>
+                                                                <Const ConstValue="'2012-08-07 00:00:00.000'" />
+                                                              </ScalarOperator>
+                                                            </Compare>
+                                                          </ScalarOperator>
+                                                        </Logical>
+                                                      </ScalarOperator>
+                                                    </Predicate>
+                                                  </IndexScan>
+                                                </RelOp>
+                                              </NestedLoops>
+                                            </RelOp>
+                                            <RelOp AvgRowSize="17" EstimateCPU="0.000221961" EstimateIO="0" EstimateRebinds="1.02894" EstimateRewinds="0" EstimateRows="53.1008" LogicalOp="Inner Join" NodeId="17" Parallel="false" PhysicalOp="Nested Loops" EstimatedTotalSubtreeCost="0.3562">
+                                              <OutputList>
+                                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="DATA" />
+                                              </OutputList>
+                                              <NestedLoops Optimized="true" WithUnorderedPrefetch="true">
+                                                <OuterReferences>
+                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="RECNUM" />
+                                                  <ColumnReference Column="Expr1010" />
+                                                </OuterReferences>
+                                                <RelOp AvgRowSize="11" EstimateCPU="0.000215411" EstimateIO="0.003125" EstimateRebinds="1.02894" EstimateRewinds="0" EstimateRows="53.1008" LogicalOp="Index Seek" NodeId="20" Parallel="false" PhysicalOp="Index Seek" EstimatedTotalSubtreeCost="0.00517856" TableCardinality="41163800">
+                                                  <OutputList>
+                                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="RECNUM" />
+                                                  </OutputList>
+                                                  <IndexScan Ordered="true" ScanDirection="FORWARD" ForcedIndex="false" ForceSeek="false" NoExpandHint="false">
+                                                    <DefinedValues>
+                                                      <DefinedValue>
+                                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="RECNUM" />
+                                                      </DefinedValue>
+                                                    </DefinedValues>
+                                                    <Object Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Index="[HISTCOBR001]" Alias="[h]" IndexKind="NonClustered" />
+                                                    <SeekPredicates>
+                                                      <SeekPredicateNew>
+                                                        <SeekKeys>
+                                                          <Prefix ScanType="EQ">
+                                                            <RangeColumns>
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="EMPRESA" />
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="N_NUMERO" />
+                                                            </RangeColumns>
+                                                            <RangeExpressions>
+                                                              <ScalarOperator ScalarString="(200)">
+                                                                <Const ConstValue="(200)" />
+                                                              </ScalarOperator>
+                                                              <ScalarOperator ScalarString="[LOFINASA].[dbo].[CADCONTR].[C_DOS] as [cad].[C_DOS]">
+                                                                <Identifier>
+                                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                                                </Identifier>
+                                                              </ScalarOperator>
+                                                            </RangeExpressions>
+                                                          </Prefix>
+                                                        </SeekKeys>
+                                                      </SeekPredicateNew>
+                                                    </SeekPredicates>
+                                                  </IndexScan>
+                                                </RelOp>
+                                                <RelOp AvgRowSize="17" EstimateCPU="0.0001581" EstimateIO="0.003125" EstimateRebinds="106.738" EstimateRewinds="0" EstimateRows="12.1104" LogicalOp="Clustered Index Seek" NodeId="22" Parallel="false" PhysicalOp="Clustered Index Seek" EstimatedTotalSubtreeCost="0.350571" TableCardinality="41163800">
+                                                  <OutputList>
+                                                    <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="DATA" />
+                                                  </OutputList>
+                                                  <IndexScan Lookup="true" Ordered="true" ScanDirection="FORWARD" ForcedIndex="false" ForceSeek="false" NoExpandHint="false">
+                                                    <DefinedValues>
+                                                      <DefinedValue>
+                                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="DATA" />
+                                                      </DefinedValue>
+                                                    </DefinedValues>
+                                                    <Object Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Index="[pk_HISTCOBR]" Alias="[h]" TableReferenceId="-1" IndexKind="Clustered" />
+                                                    <SeekPredicates>
+                                                      <SeekPredicateNew>
+                                                        <SeekKeys>
+                                                          <Prefix ScanType="EQ">
+                                                            <RangeColumns>
+                                                              <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="RECNUM" />
+                                                            </RangeColumns>
+                                                            <RangeExpressions>
+                                                              <ScalarOperator ScalarString="[LOFINASA].[dbo].[HISTCOBR].[RECNUM] as [h].[RECNUM]">
+                                                                <Identifier>
+                                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="RECNUM" />
+                                                                </Identifier>
+                                                              </ScalarOperator>
+                                                            </RangeExpressions>
+                                                          </Prefix>
+                                                        </SeekKeys>
+                                                      </SeekPredicateNew>
+                                                    </SeekPredicates>
+                                                    <Predicate>
+                                                      <ScalarOperator ScalarString="[LOFINASA].[dbo].[HISTCOBR].[DATA] as [h].[DATA]&gt;=[LOFINASA].[dbo].[CADCONTR].[C_DAT] as [cad].[C_DAT] AND ([LOFINASA].[dbo].[HISTCOBR].[LOCAL] as [h].[LOCAL]='LR' OR [LOFINASA].[dbo].[HISTCOBR].[LOCAL] as [h].[LOCAL]='LT')">
+                                                        <Logical Operation="AND">
+                                                          <ScalarOperator>
+                                                            <Compare CompareOp="GE">
+                                                              <ScalarOperator>
+                                                                <Identifier>
+                                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="DATA" />
+                                                                </Identifier>
+                                                              </ScalarOperator>
+                                                              <ScalarOperator>
+                                                                <Identifier>
+                                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DAT" />
+                                                                </Identifier>
+                                                              </ScalarOperator>
+                                                            </Compare>
+                                                          </ScalarOperator>
+                                                          <ScalarOperator>
+                                                            <Logical Operation="OR">
+                                                              <ScalarOperator>
+                                                                <Compare CompareOp="EQ">
+                                                                  <ScalarOperator>
+                                                                    <Identifier>
+                                                                      <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="LOCAL" />
+                                                                    </Identifier>
+                                                                  </ScalarOperator>
+                                                                  <ScalarOperator>
+                                                                    <Const ConstValue="'LR'" />
+                                                                  </ScalarOperator>
+                                                                </Compare>
+                                                              </ScalarOperator>
+                                                              <ScalarOperator>
+                                                                <Compare CompareOp="EQ">
+                                                                  <ScalarOperator>
+                                                                    <Identifier>
+                                                                      <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[HISTCOBR]" Alias="[h]" Column="LOCAL" />
+                                                                    </Identifier>
+                                                                  </ScalarOperator>
+                                                                  <ScalarOperator>
+                                                                    <Const ConstValue="'LT'" />
+                                                                  </ScalarOperator>
+                                                                </Compare>
+                                                              </ScalarOperator>
+                                                            </Logical>
+                                                          </ScalarOperator>
+                                                        </Logical>
+                                                      </ScalarOperator>
+                                                    </Predicate>
+                                                  </IndexScan>
+                                                </RelOp>
+                                              </NestedLoops>
+                                            </RelOp>
+                                          </NestedLoops>
+                                        </RelOp>
+                                        <RelOp AvgRowSize="12" EstimateCPU="0.0001581" EstimateIO="0.003125" EstimateRebinds="20.3461" EstimateRewinds="4.64552" EstimateRows="1" LogicalOp="Index Seek" NodeId="26" Parallel="false" PhysicalOp="Index Seek" EstimatedTotalSubtreeCost="0.0184259" TableCardinality="121015">
+                                          <OutputList>
+                                            <ColumnReference Column="IsBaseRow1005" />
+                                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="RECNUM" />
+                                          </OutputList>
+                                          <IndexScan Ordered="true" ScanDirection="FORWARD" ForcedIndex="false" ForceSeek="false" NoExpandHint="false">
+                                            <DefinedValues>
+                                              <DefinedValue>
+                                                <ColumnReference Column="IsBaseRow1005" />
+                                              </DefinedValue>
+                                              <DefinedValue>
+                                                <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="RECNUM" />
+                                              </DefinedValue>
+                                            </DefinedValues>
+                                            <Object Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Index="[TBINADIM001]" Alias="[ina]" IndexKind="NonClustered" />
+                                            <SeekPredicates>
+                                              <SeekPredicateNew>
+                                                <SeekKeys>
+                                                  <Prefix ScanType="EQ">
+                                                    <RangeColumns>
+                                                      <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_EMPRESA" />
+                                                      <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="NR_NOSSO_NUMERO" />
+                                                      <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="NR_PARCELA" />
+                                                    </RangeColumns>
+                                                    <RangeExpressions>
+                                                      <ScalarOperator ScalarString="(200)">
+                                                        <Const ConstValue="(200)" />
+                                                      </ScalarOperator>
+                                                      <ScalarOperator ScalarString="[LOFINASA].[dbo].[CADCONTR].[C_DOS] as [cad].[C_DOS]">
+                                                        <Identifier>
+                                                          <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_DOS" />
+                                                        </Identifier>
+                                                      </ScalarOperator>
+                                                      <ScalarOperator ScalarString="[LOFINASA].[dbo].[CADCONTR].[C_PAR] as [cad].[C_PAR]">
+                                                        <Identifier>
+                                                          <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[CADCONTR]" Alias="[cad]" Column="C_PAR" />
+                                                        </Identifier>
+                                                      </ScalarOperator>
+                                                    </RangeExpressions>
+                                                  </Prefix>
+                                                </SeekKeys>
+                                              </SeekPredicateNew>
+                                            </SeekPredicates>
+                                          </IndexScan>
+                                        </RelOp>
+                                      </NestedLoops>
+                                    </RelOp>
+                                    <RelOp AvgRowSize="9" EstimateCPU="0.0001581" EstimateIO="0.003125" EstimateRebinds="13.8812" EstimateRewinds="11.1104" EstimateRows="1" LogicalOp="Clustered Index Seek" NodeId="28" Parallel="false" PhysicalOp="Clustered Index Seek" EstimatedTotalSubtreeCost="0.0108125" TableCardinality="121015">
+                                      <OutputList>
+                                        <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                                      </OutputList>
+                                      <IndexScan Lookup="true" Ordered="true" ScanDirection="FORWARD" ForcedIndex="false" ForceSeek="false" NoExpandHint="false">
+                                        <DefinedValues>
+                                          <DefinedValue>
+                                            <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="CD_ACIONAMENTO" />
+                                          </DefinedValue>
+                                        </DefinedValues>
+                                        <Object Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Index="[pk_TBINADIM]" Alias="[ina]" TableReferenceId="-1" IndexKind="Clustered" />
+                                        <SeekPredicates>
+                                          <SeekPredicateNew>
+                                            <SeekKeys>
+                                              <Prefix ScanType="EQ">
+                                                <RangeColumns>
+                                                  <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="RECNUM" />
+                                                </RangeColumns>
+                                                <RangeExpressions>
+                                                  <ScalarOperator ScalarString="[LOFINASA].[dbo].[TBINADIM].[RECNUM] as [ina].[RECNUM]">
+                                                    <Identifier>
+                                                      <ColumnReference Database="[LOFINASA]" Schema="[dbo]" Table="[TBINADIM]" Alias="[ina]" Column="RECNUM" />
+                                                    </Identifier>
+                                                  </ScalarOperator>
+                                                </RangeExpressions>
+                                              </Prefix>
+                                            </SeekKeys>
+                                          </SeekPredicateNew>
+                                        </SeekPredicates>
+                                      </IndexScan>
+                                    </RelOp>
+                                  </NestedLoops>
+                                </RelOp>
+                              </Sort>
+                            </RelOp>
+                          </StreamAggregate>
+                        </RelOp>
+                      </ComputeScalar>
+                    </RelOp>
+                  </TopSort>
+                </RelOp>
+              </ComputeScalar>
+            </RelOp>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>                                                                                               

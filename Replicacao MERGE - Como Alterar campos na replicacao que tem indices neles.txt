@@ -1,0 +1,60 @@
+--Como Alterar campos na replicacao que tem indices neles:
+
+/**********************************************************************No PUBLICADOR****************************************************************/
+
+--drop index no publicador
+--drop index no artigo
+--alteracao de tipo de campo no publicador
+--rodar agente snapshot
+--sincronizar replicacao (replicar novo tipo de campo)
+--criacao dos indices no publicador novamente
+--criacao dos indices no assinante novamente
+
+drop index programas on acesso
+go
+drop index skgroup1 on acesso
+go
+drop index skgroup2 on acesso
+go
+
+alter table acesso alter column programas char(15) not null
+go
+
+--criar apos sincronizar
+create index programas on acesso (programas)
+go
+create index skgroup1 on acesso (grupos, programas, parametros)
+go
+create index skgroup2 on acesso (usuarios, programas, parametros, grupos)
+go
+
+/*
+select * from acesso
+where grupos = 'teste1'
+
+insert into acesso (grupos, parametros, programas, usuarios, cidfstreps, cidchaves) values('TESTE', 'TESTE', 'TESTE', 'TESTE', 'TESTE', LEFT(CONVERT(VARCHAR(1000),NEWID()),20))
+insert into acesso (grupos, parametros, programas, usuarios, cidfstreps, cidchaves) values('TESTE1', 'TESTE1', 'TESTE1', 'TESTE1', 'TESTE1', LEFT(CONVERT(VARCHAR(1000),NEWID()),20))
+*/
+
+/**********************************************************************No ASSINANTE****************************************************************/
+
+drop index programas on acesso
+go
+drop index skgroup1 on acesso
+go
+drop index skgroup2 on acesso
+go
+
+--criar apos sincronizar
+create index programas on acesso (programas)
+go
+create index skgroup1 on acesso (grupos, programas, parametros)
+go
+create index skgroup2 on acesso (usuarios, programas, parametros, grupos)
+go
+
+
+/*
+select * from acesso
+where grupos = 'teste1'
+*/

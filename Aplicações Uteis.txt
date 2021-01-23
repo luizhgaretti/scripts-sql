@@ -1,0 +1,8 @@
+Para Criar intenrário de um Ambiente. Puxa todas as instancias SQL Server do ambeiente- FREE
+- Quest Discovery Wizard (QDW). - http://software.dell.com/products/discovery-wizard-for-sql-server/
+
+
+
+Para realizar validação de I/O testar quantidade de escrita em disco
+- CrystalDiskMark - http://crystalmark.info/software/CrystalDiskMark/index-e.html
+

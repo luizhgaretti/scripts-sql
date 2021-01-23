@@ -1,0 +1,314 @@
+ CREATE PROCEDURE  Sp_helpindexall
+                @objname NVARCHAR(776)  
+                -- the table to check for indexes  
+AS
+  -- Based on the stored procedure sp_helpindex2 
+  -- of Kimberly L.Tripp,
+  -- http://www.SQLskills.com/blogs/Kimberly  
+  -- Only fixed a bug for the Include Columns
+  -- 2 June 2009 
+  -- There for renamed the stored procedure 
+  -- to SP_HelpindexALL to add included columns 
+  -- AND filter_definition to the output.   
+  -- See http://www.KeepItSimpleAndFast.com 
+  -- blog of André van de Graaf  
+  -- PRELIM
+  SET nocount  ON
+  
+  DECLARE  @objid             INT,   
+            -- the object id of the table  
+           @indid             SMALLINT, 
+            -- the index id of an index  
+           @groupid           INT,    
+            -- the filegroup id of an index  
+           @indname           SYSNAME,
+           @groupname         SYSNAME,
+           @status            INT,
+           @keys              NVARCHAR(2126),   
+           @inc_columns       NVARCHAR(MAX),
+           @inc_Count         SMALLINT,
+           @loop_inc_Count    SMALLINT,
+           @dbname            SYSNAME,
+           @ignore_dup_key    BIT,
+           @is_unique         BIT,
+           @is_hypothetical   BIT,
+           @is_primary_key    BIT,
+           @is_unique_key     BIT,
+           @auto_created      BIT,
+           @no_recompute      BIT,
+           @filter_definition NVARCHAR(MAX)
+  
+  -- Check to see that the object names are 
+  -- local to the current database.
+  SELECT @dbname = Parsename(@objname,3)
+  
+  IF @dbname IS NULL
+    SELECT @dbname = Db_name()
+  ELSE
+    IF @dbname <> Db_name()
+      BEGIN
+        RAISERROR (15250,-1,-1)
+        
+        RETURN (1)
+      END
+  
+  -- Check to see the the table exists and initialize @objid.
+  SELECT @objid = Object_id(@objname)
+  
+  IF @objid IS NULL
+    BEGIN
+      RAISERROR (15009,-1,-1,@objname,@dbname)
+      
+      RETURN (1)
+    END
+  
+  -- OPEN CURSOR OVER INDEXES (skip stats: bug shiloh_51196)
+  DECLARE ms_crs_ind CURSOR LOCAL STATIC FOR
+  SELECT i.index_id,
+         i.data_space_id,
+         i.name,
+         i.ignore_dup_key,
+         i.is_unique,
+         i.is_hypothetical,
+         i.is_primary_key,
+         i.is_unique_constraint,
+         s.auto_created,
+         s.no_recompute,
+         i.filter_definition
+  FROM   sys.indexes i
+         JOIN sys.stats s
+           ON i.object_id = s.object_id
+              AND i.index_id = s.stats_id
+  WHERE  i.object_id = @objid
+  
+  OPEN ms_crs_ind
+  
+  FETCH  ms_crs_ind
+  INTO @indid,
+       @groupid,
+       @indname,
+       @ignore_dup_key,
+       @is_unique,
+       @is_hypothetical,
+       @is_primary_key,
+       @is_unique_key,
+       @auto_created,
+       @no_recompute,
+       @filter_definition
+  
+  -- IF NO INDEX, QUIT
+  IF @@FETCH_STATUS < 0
+    BEGIN
+      DEALLOCATE ms_crs_ind
+      RAISERROR (15472,-1,-1,@objname) 
+        -- Object does not have any indexes.  
+      RETURN (0)
+    END
+  
+  -- create temp tables
+  CREATE TABLE #spindtab (
+    index_name SYSNAME 
+        COLLATE database_default NOT NULL,
+    index_id          INT,
+    ignore_dup_key    BIT,
+    is_unique         BIT,
+    is_hypothetical   BIT,
+    is_primary_key    BIT,
+    is_unique_key     BIT,
+    auto_created      BIT,
+    no_recompute      BIT,
+    groupname SYSNAME 
+        COLLATE database_default NULL,
+    index_keys NVARCHAR(2126)
+        COLLATE database_default   NOT NULL, 
+    -- see @keys above for length descr  
+    filter_definition NVARCHAR(MAX),
+    inc_count         SMALLINT,
+    inc_columns       NVARCHAR(MAX))
+  
+  CREATE TABLE #includedcolumns (
+    rownumber SMALLINT,
+    [Name]    NVARCHAR(128))
+  
+  -- Now check out each index, 
+  -- figure out its type and keys and  
+  -- save the info in a temporary table 
+  -- that we'll print out at the end.
+  WHILE @@FETCH_STATUS >= 0
+    BEGIN
+      -- First we'll figure out 
+      -- what the keys are.
+      DECLARE  @i       INT,
+               @thiskey NVARCHAR(131)   
+      
+      SELECT @keys = Index_col(@objname,@indid,1),
+             @i = 2
+      
+IF (Indexkey_property(@objid,@indid,1,'isdescending') = 1)
+ SELECT @keys = @keys + '(-)'
+   
+ SELECT @thiskey = Index_col(@objname,@indid,@i)
+      
+IF ((@thiskey IS NOT NULL)
+ AND (Indexkey_property(@objid,@indid,@i,'isdescending') = 1))
+ SELECT @thiskey = @thiskey + '(-)'
+      
+WHILE (@thiskey IS NOT NULL)
+ BEGIN
+ SELECT @keys = @keys + ', ' + @thiskey,
+        @i = @i + 1
+     
+ SELECT @thiskey = Index_col(@objname,@indid,@i)
+          
+ IF ((@thiskey IS NOT NULL)
+ AND (Indexkey_property(@objid,@indid,@i,'isdescending') = 1))
+   SELECT @thiskey = @thiskey + '(-)'
+        END
+      
+      -- Second, we'll figure out 
+      -- what the included columns are.
+      SELECT @inc_Count = Count(* )
+      FROM   sys.tables AS tbl
+             INNER JOIN sys.indexes AS si
+               ON (si.index_id > 0
+                   AND si.is_hypothetical = 0)
+                  AND (si.object_id = tbl.object_id)
+             INNER JOIN sys.index_columns AS ic
+               ON (ic.column_id > 0
+                   AND (ic.key_ordinal > 0
+                         OR ic.partition_ordinal = 0
+                         OR ic.is_included_column != 0))
+                  AND (ic.index_id = Cast(si.index_id AS INT)
+                       AND ic.object_id = si.object_id)
+             INNER JOIN sys.columns AS clmns
+               ON clmns.object_id = ic.object_id
+                  AND clmns.column_id = ic.column_id
+      WHERE  ic.is_included_column = 1
+             AND (si.index_id = @indid)
+             AND (tbl.object_id = @objid)
+      
+      -- ADD Set included columns 
+      -- to NULL to script of Kimberly 
+      -- otherwise an index without 
+      -- an include column 
+      -- will get the first include 
+      -- of the previous index
+      SET @inc_columns = NULL
+      
+      IF @inc_Count > 0
+        -- Add begin to script of Kimberly
+        BEGIN
+          INSERT #includedcolumns
+          SELECT Row_number()
+                   OVER(ORDER BY clmns.column_id),
+                 clmns.name
+          FROM   sys.tables AS tbl
+           INNER JOIN sys.indexes AS si
+            ON (si.index_id > 0
+                AND si.is_hypothetical = 0)
+                AND (si.object_id = tbl.object_id)
+           INNER JOIN sys.index_columns AS ic
+            ON (ic.column_id > 0
+                AND (ic.key_ordinal > 0
+                OR ic.partition_ordinal = 0
+                OR ic.is_included_column != 0))
+                AND (ic.index_id = Cast(si.index_id AS INT)
+                AND ic.object_id = si.object_id)
+           INNER JOIN sys.columns AS clmns
+            ON clmns.object_id = ic.object_id
+                AND clmns.column_id = ic.column_id
+   WHERE  ic.is_included_column = 1
+         AND (si.index_id = @indid)
+         AND (tbl.object_id = @objid)
+          
+  SELECT @inc_columns = [Name]
+  FROM   #includedcolumns
+  WHERE  rownumber = 1
+      
+  SET @loop_inc_Count = 1
+      
+  WHILE @loop_inc_Count < @inc_Count
+     BEGIN
+     SELECT @inc_columns = @inc_columns + ', ' + [Name]
+     FROM   #includedcolumns
+     WHERE  rownumber = @loop_inc_Count + 1
+            
+     SET @loop_inc_Count = @loop_inc_Count + 1
+    END
+ -- Add END to script of Kimberly
+ END
+      
+      SELECT @groupname = NULL
+      
+      SELECT @groupname = name
+      FROM   sys.data_spaces
+      WHERE  data_space_id = @groupid
+      
+      -- INSERT ROW FOR INDEX
+      INSERT INTO #spindtab
+      VALUES     (@indname,
+                  @indid,
+                  @ignore_dup_key,
+                  @is_unique,
+                  @is_hypothetical,
+                  @is_primary_key,
+                  @is_unique_key,
+                  @auto_created,
+                  @no_recompute,
+                  @groupname,
+                  @keys,
+                  @filter_definition,
+                  @inc_Count,
+                  @inc_columns)
+      
+      -- Next index
+      FETCH  ms_crs_ind
+      INTO @indid,
+           @groupid,
+           @indname,
+           @ignore_dup_key,
+           @is_unique,
+           @is_hypothetical,
+           @is_primary_key,
+           @is_unique_key,
+           @auto_created,
+           @no_recompute,
+           @filter_definition
+    END
+  
+  DEALLOCATE ms_crs_ind
+  
+  -- DISPLAY THE RESULTS
+  SELECT 'index_name' = index_name,
+    'index_description' = Convert(VARCHAR(210), 
+    CASE WHEN index_id = 1 THEN 'clustered' 
+      ELSE 'nonclustered' END +
+    CASE WHEN ignore_dup_key <> 0 
+      THEN ', ignore duplicate keys' 
+      ELSE '' END +
+    CASE WHEN is_unique <> 0 
+      THEN ', unique' 
+      ELSE '' END +
+    CASE WHEN is_hypothetical <> 0 
+      THEN ', hypothetical' 
+      ELSE '' END +
+    CASE WHEN is_primary_key <> 0 
+      THEN ', primary key' 
+      ELSE '' END +
+    CASE WHEN is_unique_key <> 0 
+      THEN ', unique key' 
+      ELSE '' END +
+    CASE WHEN auto_created <> 0 
+      THEN ', auto create' 
+      ELSE '' END +
+    CASE WHEN no_recompute <> 0 
+      THEN ', stats no recompute' 
+      ELSE '' END + ' located on ' + groupname),
+     'index_keys' = index_keys,
+     --'num_included_columns' = inc_Count,
+     'included_columns' = inc_columns,
+     'filter_definition' = filter_definition
+  FROM     #spindtab
+  ORDER BY index_name
+  
+  RETURN (0) -- sp_helpindexwinc2

@@ -1,0 +1,35 @@
+SELECT s.name as [schema], t.name as [table]
+, ix.[indexes]
+, c.[columns]
+, p.[rows]
+, i.[type_desc]
+FROM sys.schemas s
+INNER JOIN sys.tables t
+    ON t.[schema_id] = s.[schema_id]
+ 
+-- Contagem de linhas [rows]
+INNER JOIN sys.indexes i
+    ON i.[object_id] = t.[object_id]
+ 
+INNER JOIN sys.partitions p
+    ON p.[object_id] = t.[object_id]
+    AND p.[index_id] = i.[index_id]
+ 
+-- Contagem de colunas [columns]
+CROSS APPLY (
+    SELECT COUNT(*) AS [columns]
+    FROM sys.columns c
+    WHERE c.[object_id] = t.[object_id]
+) c
+ 
+-- Contagem de índices [indexes]
+CROSS APPLY (
+    SELECT COUNT(*) AS [indexes]
+    FROM sys.indexes ix
+    WHERE ix.[object_id] = t.[object_id]
+    AND ix.type NOT IN (0,1)
+) ix
+ 
+WHERE i.[type] IN (0,1)
+ 
+ORDER BY [schema], [table]

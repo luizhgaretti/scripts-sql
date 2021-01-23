@@ -1,0 +1,79 @@
+--**************************************************************************************************
+--Lista o percentual de índices de cada banco de dados
+--**************************************************************************************************
+declare @ncliente int
+set @ncliente = XXX
+
+--drop table #tb_dba_bancos
+create table #tb_dba_bancos
+(
+ banco varchar(100)
+,nOrdem int not null identity (1,1)
+,percentual numeric(9,2) null
+)
+
+insert into #tb_dba_bancos ( banco)
+select
+name
+from
+master.dbo.sysdatabases
+where
+name not in ( 'tempdb', 'model', 'master', 'msdb' )
+and version is not null
+order by name
+
+declare @banco varchar(100)
+declare @sqlb varchar(max)
+
+
+declare @nordemb int
+set @nordemb = ( select MIN(nOrdem) from #tb_dba_bancos )
+
+--drop table #tb_dba_bancos_percentual
+create table #tb_dba_bancos_percentual
+(
+ banco varchar(100) 
+,percentual numeric(9,2)
+)
+
+while @nordemb <= ( select MAX(nOrdem) from #tb_dba_bancos )
+begin 
+	set @sqlb = 'insert into #tb_dba_bancos_percentual  select ' + CHAR(39)+ (select banco from #tb_dba_bancos where nOrdem = @nordemb) + CHAR(39) + ', '
+	set @sqlb = @sqlb + ' percentual = ((sum(a.used_pages) - sum('
+	set @sqlb = @sqlb + ' CASE'
+	set @sqlb = @sqlb + ' When it.internal_type IN (202,204,211,212,213,214,215,216) Then 0'
+	set @sqlb = @sqlb + ' When a.type <> 1 Then a.used_pages'
+	set @sqlb = @sqlb + ' When p.index_id < 2 Then a.data_pages'
+	set @sqlb = @sqlb + ' Else 0'
+	set @sqlb = @sqlb + ' END'
+	set @sqlb = @sqlb + ' )) * 8192 / 1024.) / ((sum('
+	set @sqlb = @sqlb + ' CASE'
+	set @sqlb = @sqlb + ' When it.internal_type IN (202,204,211,212,213,214,215,216) Then 0'
+	set @sqlb = @sqlb + ' When a.type <> 1 Then a.used_pages'
+	set @sqlb = @sqlb + ' When p.index_id < 2 Then a.data_pages'
+	set @sqlb = @sqlb + ' Else 0'
+	set @sqlb = @sqlb + ' END'
+	set @sqlb = @sqlb + ' ) * 8192 / 1024.) +' +'((sum(a.used_pages) - sum(' + ' CASE'+ ' When it.internal_type IN (202,204,211,212,213,214,215,216) Then 0'+ ' When a.type <> 1 Then a.used_pages'+ ' When p.index_id < 2 Then a.data_pages'+ ' Else 0'+ ' END'+ ' )) * 8192 / 1024.)'  +') * 100'
+	set @sqlb = @sqlb + ' from '
+	set @sqlb = @sqlb + '[' +(select banco from #tb_dba_bancos where nOrdem = @nordemb) +']' + '.sys.partitions p '
+	set @sqlb = @sqlb + ' join ' + '[' +(select banco from #tb_dba_bancos where nOrdem = @nordemb) +']' + '.sys.allocation_units a on p.partition_id = a.container_id'
+	set @sqlb = @sqlb + ' left join ' + '[' +(select banco from #tb_dba_bancos where nOrdem = @nordemb) +']' + '.sys.internal_tables it on p.object_id = it.object_id'
+	
+	exec (@sqlb)
+	set @nordemb = @nordemb + 1
+end
+
+
+insert into [200.158.216.85].monitordba.dbo.Tb_Mon_Mov_PercIndicesDados
+( ncliente, dt_historico, nomebd, perc_indice, perc_dados )
+select 
+@ncliente ncliente
+,GETDATE() dt_historico
+,banco nomebd
+,percentual perc_indice
+,100 - ISNULL(percentual,0) perc_dados 
+from 
+#tb_dba_bancos_percentual 
+--**************************************************************************************************
+--Lista o percentual de índices de cada banco de dados
+--**************************************************************************************************

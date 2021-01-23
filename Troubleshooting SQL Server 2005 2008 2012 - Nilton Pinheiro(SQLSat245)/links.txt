@@ -1,0 +1,11 @@
+
+Mastering SQL Server Profiler by Brad McGehee
+http://download.red-gate.com/ebooks/SQL/Mastering_Profiler_eBook.pdf
+
+
+ 
+Performance Tuning with SQL Server Dynamic Management Views by Tim Ford and Louis 
+http://download.red-gate.com/ebooks/SQL/eBook_Performance_Tuning_Davidson_Ford.pdf
+
+http://sqlserverperformance.wordpress.com/2013/07/09/sql-server-diagnostic-information-queries-for-july-2013/
+

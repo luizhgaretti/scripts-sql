@@ -1,0 +1,80 @@
+--Investigating index usage (index_usage_stats)
+SELECT 
+distinct
+OBJECT_NAME(ddius.[object_id]) AS [object_name] ,
+I.NAME AS [INDEX],
+I.TYPE_DESC,
+--ddius.index_id ,
+ddius.user_seeks ,
+ddius.user_scans ,
+ddius.user_lookups ,
+ddius.user_seeks + ddius.user_scans + ddius.user_lookups AS user_reads ,
+ddius.user_updates AS user_writes ,
+ddius.last_user_seek,
+ddius.last_user_scan ,
+ddius.last_user_update,
+(I2.RESERVED*8)/1024 AS SIZE_INDEX_MB
+INTO #INDEXES_USAGE_STATS
+FROM sys.dm_db_index_usage_stats ddius
+JOIN SYS.INDEXES I ON I.INDEX_ID = DDIUS.INDEX_ID AND I.OBJECT_ID = DDIUS.OBJECT_ID
+JOIN SYSINDEXES I2 ON I2.ID = i.object_id AND I2.INDID = I.INDEX_ID
+WHERE ddius.database_id > 4 -- filter out system tables
+AND OBJECTPROPERTY(ddius.OBJECT_ID, 'IsUserTable') = 1
+AND ddius.index_id > 0 -- filter out heaps 
+AND OBJECT_NAME(ddius.[object_id]) NOT LIKE 'MS%'
+AND DDIUS.last_user_update IN (SELECT MAX(last_user_update) FROM SYS.dm_db_index_usage_stats GROUP BY OBJECT_ID,index_id )
+--AND OBJECT_NAME(ddius.[object_id]) IN ('SLJEESTI','SLJMCCR','SLJHIS')
+--AND OBJECT_NAME(ddius.[object_id]) IN ('SLJMCCR')
+AND I.TYPE_DESC <> 'CLUSTERED'
+AND user_seeks = 0
+AND user_scans = 0
+AND user_lookups = 0
+--ORDER BY ddius.user_scans DESC
+ORDER BY 1 DESC
+GO
+
+--lista os indices e tambem os includes
+with connect
+(schema_name,table_name,index_name,index_column_id,column_name) as
+(   select s.name schema_name, t.name table_name, i.name index_name, index_column_id, cast(c.name as varchar(max)) column_name
+from sys.tables t
+inner join sys.schemas s on t.schema_id = s.schema_id
+inner join sys.indexes i on i.object_id = t.object_id
+inner join sys.index_columns ic on ic.object_id = t.object_id and ic.index_id=i.index_id
+inner join sys.columns c on c.object_id = t.object_id and ic.column_id = c.column_id
+where index_column_id=1
+union all
+select s.name schema_name, t.name table_name, i.name index_name, ic.index_column_id, cast(connect.column_name + ',' + c.name as varchar(max)) column_name
+from sys.tables t
+inner join sys.schemas s on t.schema_id = s.schema_id
+inner join sys.indexes i on i.object_id = t.object_id
+inner join sys.index_columns ic on ic.object_id = t.object_id and ic.index_id=i.index_id
+inner join sys.columns c on c.object_id = t.object_id and ic.column_id = c.column_id 
+join connect on connect.index_column_id+1 = ic.index_column_id 
+and connect.schema_name = s.name
+and connect.table_name = t.name
+and connect.index_name = i.name)
+
+select 
+DISTINCT
+connect.schema_name,connect.table_name,connect.index_name,connect.column_name, IX.SIZE_INDEX_MB ,GETDATE() AS DATA_DELETE
+INTO #LIST_INDEXES_TABLES
+from connect 
+join (select schema_name,table_name,index_name,MAX(index_column_id) index_column_id
+            from connect group by schema_name,table_name,index_name) mx on connect.schema_name = mx.schema_name
+join (SELECT [OBJECT_NAME], [INDEX], SIZE_INDEX_MB FROM #INDEXES_USAGE_STATS) ix on mx.table_name = ix.[object_name] and mx.index_name = ix.[index]
+and connect.table_name = mx.table_name
+and connect.index_name = mx.index_name
+and connect.index_column_id = mx.index_column_id
+--and connect.table_name IN (SELECT [OBJECT_NAME] FROM #INDEXES_USAGE_STATS)
+order by 1,2,3
+GO
+
+SELECT '######RESULTADO DA UTILIZAÇÃO DOS INDICES######'
+SELECT * FROM #INDEXES_USAGE_STATS ORDER BY 1
+
+SELECT '######RESULTADO DA LISTA DOS INDICES E TAMANHO TOTAL DE OCUPAÇÃO DO INDICE######'
+SELECT * FROM #LIST_INDEXES_TABLES ORDER BY 1 compute sum(SIZE_INDEX_MB) 
+
+DROP TABLE #INDEXES_USAGE_STATS
+DROP TABLE #LIST_INDEXES_TABLES

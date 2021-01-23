@@ -1,0 +1,2 @@
+
+sp_spaceused 'tabela'

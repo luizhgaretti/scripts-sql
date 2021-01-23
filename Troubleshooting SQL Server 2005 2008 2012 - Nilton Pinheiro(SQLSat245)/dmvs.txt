@@ -1,0 +1,22 @@
+SELECT * from sys.dm_server_registry (antes usava-se xp_reg_read)
+
+SELECT * FROM sys.dm_os_windows_info
+
+SELECT * FROM sys.dm_server_services
+
+
+--TOP 10 CPU Consumers
+
+SELECT TOP 10 
+last_execution_time, ProcedureName = t.text, 
+ExecutionCount  = s.execution_count, 
+AvgExecutionTime = isnull( s.total_elapsed_time / s.execution_count, 0 ),   
+AvgWorkerTime = s.total_worker_time / s.execution_count,
+TotalWorkerTime  = s.total_worker_time, MaxLogicalReads  = s.max_logical_reads, 
+MaxLogicalWrites = s.max_logical_writes, 
+CallsPerSecond   = isnull( s.execution_count / datediff( second, s.creation_time, getdate()), 0 )
+FROM sys.dm_exec_query_stats s
+CROSS APPLY sys.dm_exec_sql_text( s.sql_handle ) t
+ORDER BY 
+s.total_elapsed_time DESC
+

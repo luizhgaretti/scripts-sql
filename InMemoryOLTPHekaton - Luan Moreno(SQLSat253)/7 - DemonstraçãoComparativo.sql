@@ -1,0 +1,59 @@
+USE SQLSaturdayHekaton
+go
+
+--	DROP TABLE DiskTableCliente
+CREATE TABLE DiskTableCliente
+(
+	ID INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	NumeroBeneficio BIGINT INDEX idxNumeroBeneficio,
+	Nome VARCHAR(100) NOT NULL,
+	CPF CHAR(13) NOT NULL INDEX idxCPF,
+	CTPS CHAR(50) NULL,
+	Nacionalidade VARCHAR(20) NULL,
+	UF CHAR(2) NULL,
+	Sexo CHAR(1) NULL,
+	DataNascimento DATE INDEX idxDataNascimento
+)
+
+--	DROP TABLE InMemoryCliente
+CREATE TABLE InMemoryCliente
+(
+	ID INT NOT NULL PRIMARY KEY NONCLUSTERED HASH WITH (BUCKET_COUNT = 1000000),
+	NumeroBeneficio BIGINT INDEX idxNumeroBeneficio HASH WITH (BUCKET_COUNT = 1000000) NOT NULL,
+	Nome VARCHAR(100) NOT NULL,
+	CPF NCHAR(13) COLLATE Latin1_General_100_BIN2 INDEX idxCPF HASH WITH (BUCKET_COUNT = 1000000) NOT NULL,
+	CTPS CHAR(50) NULL,
+	Nacionalidade VARCHAR(20),
+	UF CHAR(2) NULL,
+	Sexo CHAR(1) NULL,
+	DataNascimento DATE INDEX idxDataNascimento HASH WITH (BUCKET_COUNT = 1000000) NOT NULL
+)
+WITH (MEMORY_OPTIMIZED = ON , DURABILITY = SCHEMA_AND_DATA);
+GO
+
+
+SET STATISTICS TIME ON
+SET STATISTICS IO ON
+
+SELECT COUNT(*) AS DiskTables
+FROM dbo.DiskTableCliente
+--12.794.080
+
+SELECT COUNT(*) AS InMemoryTables
+FROM dbo.InMemoryCliente
+--12.794.080
+
+SELECT TOP 10 *
+FROM dbo.DiskTableCliente
+go
+SELECT TOP 10 *
+FROM dbo.InMemoryCliente
+
+----------
+----------
+
+SELECT *
+FROM dbo.DiskTableCliente
+go
+SELECT *
+FROM dbo.InMemoryCliente

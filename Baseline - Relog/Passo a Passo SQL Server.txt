@@ -1,0 +1,30 @@
+
+Procedimentos para Ataulizar Tabela de Performance do SQL Server
+----------------------------------------------------------------
+
+--> Agendar o PERFMON para coletar informações de um determinado periodo
+	-- Salvar a saída (.blg)
+
+
+--> Utilizar o RELOG para importar os arquivos do PERFMON para dentro do SQL Server
+	-- relog "D:\Testes\Perfmon\Auditoria\*" -f SQL -o SQL:DSN_SQL!WKS322
+
+
+--> Manipular informações
+	-- JOB
+
+
+--> Na importação o RELOG cria 3 tabelas padrões
+	CounterDetails -> Armazena informações sobre os contadores coletados
+	CounterData    -> Armazena os dados coletados pelo contadores
+	DisplayToID    -> Armazena horários, maquinas onde está sendo coletadas as informações
+
+
+--> Importar os para Excel
+	-- Importar e Gerar Gráfico Dinamico
+	
+
+--- OBSERVAÇÕES ---
+1º O Relog utiliza conexão ODBC. Com isso é preciso criar uma conexão com a base de Dados onde será importado os dados coletados
+2º Na primeira execução o Relog Crias as tabelas, nas proximas ele só incrementa
+3º Interessante criar um Job para fazer a execução do Relog para importar os dados automaticamente

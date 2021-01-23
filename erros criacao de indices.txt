@@ -1,0 +1,12 @@
+Caution: Changing any part of an object name could break scripts and stored procedures.
+Caution: Changing any part of an object name could break scripts and stored procedures.
+Caution: Changing any part of an object name could break scripts and stored procedures.
+Caution: Changing any part of an object name could break scripts and stored procedures.
+Caution: Changing any part of an object name could break scripts and stored procedures.
+Msg 1779, Level 16, State 0, Line 1
+Table 'sljfrete' already has a primary key defined on it.
+Msg 1750, Level 16, State 0, Line 1
+Could not create constraint. See previous errors.
+Caution: Changing any part of an object name could break scripts and stored procedures.
+Caution: Changing any part of an object name could break scripts and stored procedures.
+Caution: Changing any part of an object name could break scripts and stored procedures.

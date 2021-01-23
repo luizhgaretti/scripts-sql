@@ -1,0 +1,63 @@
+BEGIN TRAN
+
+UPDATE PRODUTO_TMP
+SET GRUPO = 'DIV'
+WHERE GRUPO = ''
+
+COMMIT
+
+---------------------------------------------------------
+
+SELECT * FROM PRODUTO_TMP
+WHERE G_GRUPO = 'DIV' AND DESMAT LIKE '%PULSEIRA%'
+
+UPDATE PRODUTO_TMP
+SET G_GRUPO = 'PEC', GRUPO = 'PUL'
+WHERE G_GRUPO = 'DIV' AND DESMAT LIKE '%PULSEIRA%'
+
+/*********************************************************/
+
+SELECT * FROM PRODUTO_TMP
+WHERE G_GRUPO = 'JOI' AND DESMAT LIKE '%PIERCING%'
+
+UPDATE PRODUTO_TMP
+SET GRUPO = 'PIE'
+WHERE G_GRUPO = 'JOI' AND DESMAT LIKE '%PIERCING%'
+
+/*********************************************************/
+
+SELECT * FROM PRODUTO_TMP
+WHERE G_GRUPO = 'JOI' AND DESMAT LIKE '%ABOTOADURA%'
+
+UPDATE PRODUTO_TMP
+SET GRUPO = 'AB'
+WHERE G_GRUPO = 'JOI' AND DESMAT LIKE '%ABOTOADURA%'
+
+/*********************************************************/
+
+SELECT * FROM PRODUTO_TMP
+WHERE G_GRUPO = 'JOI' AND DESMAT LIKE '%MONT BLANC%'
+
+UPDATE PRODUTO_TMP
+SET G_GRUPO = 'REL', GRUPO = 'RMB'
+WHERE G_GRUPO = 'JOI' AND DESMAT LIKE '%MONT BLANC%'
+
+/*********************************************************/
+
+SELECT * FROM PRODUTO_TMP
+WHERE G_GRUPO = 'INS' AND DESMAT LIKE '%LAPISEIRA%'
+
+UPDATE PRODUTO_TMP
+SET GRUPO = 'LAP'
+WHERE G_GRUPO = 'INS' AND DESMAT LIKE '%LAPISEIRA%'
+
+
+/*********************************************************/
+
+SELECT * FROM PRODUTO_TMP
+WHERE G_GRUPO = 'REL' AND GRUPO = 'REL'
+
+UPDATE PRODUTO_TMP
+
+
+

@@ -1,0 +1,71 @@
+--missing index
+select db_name (database_id) as banco, OBJECT_NAME(object_id) as tabela, equality_columns, inequality_columns, included_columns, statement
+ from sys.dm_db_missing_index_details
+where db_name (database_id) = 'dl_cpt2009'
+go
+
+
+/******************************************************************************************************************************************************************/
+
+
+--verificar quais indices não foram usados ou frequencia usada
+SELECT
+    DB_NAME(database_id) As Banco, OBJECT_NAME(I.object_id) As Tabela, I.Name As Indice,
+    U.User_Seeks As Consultas, U.User_Scans As Varreduras, --U.User_Lookups As Pesquisa,
+    U.Last_User_Seek As UltimaConsulta, U.Last_User_Scan As UltimaVarredura
+    --U.Last_User_LookUp As UltimaPesquisa, 
+    --U.Last_User_Update As UltimaAtualizacao
+FROM
+    sys.indexes As I
+    LEFT OUTER JOIN sys.dm_db_index_usage_stats As U
+    ON I.object_id = U.object_id AND I.index_id = U.index_id 
+--WHERE I.object_id = OBJECT_ID('index_teste_used') 
+where i.object_id > 98 and DB_NAME(database_id) = 'dl_cpt2009'
+order by 2, 3
+
+
+/******************************************************************************************************************************************************************/
+
+
+--fragmentacao de indices
+SELECT OBJECT_NAME ( OBJECT_ID ) as 'tabela', 
+index_type_desc ,
+avg_fragmentation_in_percent, 
+--avg_fragment_size_in_pages,
+--(page_count * 8.0 / 1024.0) as 'espaço usado MB'
+page_count
+INTO ##FRAG_INDEX
+FROM sys.dm_db_index_physical_stats 
+( DB_ID ( 'sismoura' ), NULL, NULL, NULL , 'SAMPLED' ) 
+where avg_fragmentation_in_percent <> 0 
+and page_count > 100 
+and OBJECT_NAME ( OBJECT_ID ) not like '%merge%'
+--ORDER BY 3 DESC 
+
+SELECT * FROM ##FRAG_INDEX
+ORDER BY avg_fragmentation_in_percent DESC
+
+/*
+select 'ALTER INDEX  ['+I.NAME+'] ON ['+S.NAME+'].['+T.NAME+'] REBUILD PARTITION = ALL 
+WITH (FILLFACTOR = 90, PAD_INDEX  = ON, STATISTICS_NORECOMPUTE  = OFF, ALLOW_ROW_LOCKS  = ON, 
+ALLOW_PAGE_LOCKS  = ON, ONLINE = OFF, SORT_IN_TEMPDB = ON)' + CHAR(13)+CHAR(10)+ 'GO'
+from sys.indexes I
+join
+sys.tables T
+on
+I.object_id = T.object_id
+join sys.schemas S
+on
+t.schema_id = S.schema_id
+where I.name is not null
+and i.type not in (0,3,4)
+and t.name in 
+*/
+
+
+
+
+
+
+
+

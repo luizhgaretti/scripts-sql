@@ -1,0 +1,40 @@
+USE SQLSaturday
+go
+
+SELECT is_memory_optimized, *
+FROM sys.tables
+WHERE name = 'DiskTableDadosAtendimento'
+
+--Disk-Tables
+BEGIN TRANSACTION 
+
+INSERT INTO dbo.DiskTableDadosAtendimento
+VALUES (999998,99999999,1334,1372739910,'0',1,'2013-05-09 23:59:59.000',558,6268,'TARCILIO RODRIGUES DA SILVA',67377947934,'1942-08-20 00:00:00.000',NULL)
+
+SELECT *
+FROM sys.dm_tran_locks
+WHERE request_session_id = @@SPID
+
+ROLLBACK TRANSACTION
+COMMIT TRANSACTION 
+GO
+
+SELECT @@TRANCOUNT
+
+SELECT is_memory_optimized, *
+FROM sys.tables
+WHERE name = 'InMemoryDadosAtendimento'
+
+--Memory-Tables
+BEGIN TRANSACTION
+
+INSERT INTO dbo.InMemoryDadosAtendimento
+VALUES (9999988,99999999,1334,1372739910,'0',1,'2013-05-09 23:59:59.000',558,6268,'TARCILIO RODRIGUES DA SILVA',67377947934,'1942-08-20 00:00:00.000',NULL)
+
+SELECT *
+FROM sys.dm_tran_locks
+WHERE request_session_id = @@SPID
+
+ROLLBACK TRANSACTION
+COMMIT TRANSACTION 
+GO
